@@ -41,7 +41,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Insert initial credentials from the bash script as defaults
     final List<Map<String, String>> initialCreds = [
       {"username": "testdummy", "password": "testdummy"},
     ];
