@@ -49,10 +49,15 @@ jobs:
       - run: flutter pub get
       - run: flutter build windows --release
 
+      - name: Zip Windows build
+        shell: pwsh
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath windows-app.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: build/windows/x64/runner/Release/
+          path: windows-app.zip
 
 # ---------------- LINUX BUILD ----------------
   build-linux:
@@ -75,10 +80,15 @@ jobs:
       - run: flutter pub get
       - run: flutter build linux --release
 
+      - name: Zip Linux build
+        run: |
+          cd build/linux/x64/release/bundle/
+          zip -r ../../../../../linux-app.zip .
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-build
-          path: build/linux/x64/release/bundle/
+          path: linux-app.zip
 
 # ---------------- RELEASE JOB ----------------
   release:
@@ -87,10 +97,14 @@ jobs:
 
     steps:
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            **/*
+            macos-app.zip
+            windows-app.zip
+            linux-app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
