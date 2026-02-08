@@ -1,7 +1,11 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import '../models/credential.dart';
 import '../models/login_log.dart';
+
+import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -17,7 +21,18 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'aus_wifi.db');
+    String path;
+    if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      final directory = await getApplicationSupportDirectory();
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      path = join(directory.path, 'aus_wifi.db');
+    } else {
+      path = join(await getDatabasesPath(), 'aus_wifi.db');
+    }
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
