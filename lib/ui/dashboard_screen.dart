@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/wifi_provider.dart';
@@ -41,7 +40,7 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "AUS WIFI Connector",
+          "AUS Wi-Fi Connector",
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -49,14 +48,14 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
         Text(
-          "I don’t get attached to one login.",
+          "Designed to manage multiple network credentials efficiently.",
           style: TextStyle(
             fontSize: 16,
             color: NeumorphicTheme.variantColor(context),
           ),
         ),
         Text(
-          "If it fails, I switch — fast, smooth, and without asking for permission 😏",
+          "If one connection is unavailable, the system automatically switches to an alternative for a seamless experience.",
           style: TextStyle(
             fontSize: 14,
             color: NeumorphicTheme.variantColor(context),
@@ -71,7 +70,7 @@ class DashboardScreen extends ConsumerWidget {
     bool isError =
         state.status == 'Error' ||
         state.status == 'Login Failed' ||
-        state.status == 'Wrong Wi-Fi. This app has standards.';
+        state.status == 'Wrong Connection.';
 
     return Neumorphic(
       padding: const EdgeInsets.all(24),
@@ -158,7 +157,7 @@ class DashboardScreen extends ConsumerWidget {
     bool isError =
         state.status == 'Error' ||
         state.status == 'Login Failed' ||
-        state.status == 'Wrong Wi-Fi. This app has standards.';
+        state.status == 'Wrong Connection';
     return Center(
       child: NeumorphicButton(
         onPressed: notifier.toggleMonitoring,

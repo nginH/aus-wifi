@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/credential.dart';
 import '../providers/wifi_provider.dart';
 
 class CredentialScreen extends ConsumerWidget {
@@ -112,6 +113,14 @@ class CredentialScreen extends ConsumerWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: Colors.blue,
+                        ),
+                        onPressed: () =>
+                            _showEditDialog(context, notifier, cred),
+                      ),
                       NeumorphicSwitch(
                         value: cred.isActive,
                         onChanged: (_) => notifier.toggleCredentialActive(cred),
@@ -146,6 +155,97 @@ class CredentialScreen extends ConsumerWidget {
     );
   }
 
+  /// ✅ MODERN EDIT DIALOG
+  void _showEditDialog(
+    BuildContext context,
+    WifiNotifier notifier,
+    Credential cred,
+  ) {
+    final userController = TextEditingController(text: cred.username);
+    final passController = TextEditingController(text: cred.password);
+
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: NeumorphicTheme.baseColor(context),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Edit Credential",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: userController,
+                decoration: const InputDecoration(
+                  labelText: "Username",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  Row(
+                    children: [
+                      NeumorphicButton(
+                        onPressed: () async {
+                          final response = await notifier.performManualLogin(
+                            userController.text,
+                            passController.text,
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(response.message)),
+                            );
+                          }
+                        },
+                        child: const Text("Test"),
+                      ),
+                      const SizedBox(width: 8),
+                      NeumorphicButton(
+                        onPressed: () {
+                          if (userController.text.isEmpty ||
+                              passController.text.isEmpty) {
+                            return;
+                          }
+                          notifier.updateCredential(
+                            cred.id!,
+                            userController.text,
+                            passController.text,
+                          );
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Save"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// ✅ MODERN ADD DIALOG
   void _showAddDialog(BuildContext context, WifiNotifier notifier) {
     final userController = TextEditingController();
@@ -165,9 +265,7 @@ class CredentialScreen extends ConsumerWidget {
                 "Add Credential",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 20),
-
               TextField(
                 controller: userController,
                 decoration: const InputDecoration(
@@ -175,9 +273,7 @@ class CredentialScreen extends ConsumerWidget {
                   border: OutlineInputBorder(),
                 ),
               ),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: passController,
                 obscureText: true,
@@ -186,9 +282,7 @@ class CredentialScreen extends ConsumerWidget {
                   border: OutlineInputBorder(),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -196,21 +290,38 @@ class CredentialScreen extends ConsumerWidget {
                     onPressed: () => Navigator.pop(context),
                     child: const Text("Cancel"),
                   ),
-
-                  NeumorphicButton(
-                    onPressed: () {
-                      if (userController.text.isEmpty ||
-                          passController.text.isEmpty)
-                        return;
-
-                      notifier.addCredential(
-                        userController.text,
-                        passController.text,
-                      );
-
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Add"),
+                  Row(
+                    children: [
+                      NeumorphicButton(
+                        onPressed: () async {
+                          final response = await notifier.performManualLogin(
+                            userController.text,
+                            passController.text,
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(response.message)),
+                            );
+                          }
+                        },
+                        child: const Text("Test"),
+                      ),
+                      const SizedBox(width: 8),
+                      NeumorphicButton(
+                        onPressed: () {
+                          if (userController.text.isEmpty ||
+                              passController.text.isEmpty) {
+                            return;
+                          }
+                          notifier.addCredential(
+                            userController.text,
+                            passController.text,
+                          );
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Add"),
+                      ),
+                    ],
                   ),
                 ],
               ),

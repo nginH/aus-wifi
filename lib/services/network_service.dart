@@ -31,27 +31,56 @@ class NetworkService {
     return ip.startsWith(targetSubnet);
   }
 
-  Future<LoginResponse> performLogin(Credential credential) async {
+  Future<LoginResponse> performLogin(
+    Credential credential,
+    String loginUrl, {
+    String method = 'POST',
+    Map<String, String>? headers,
+  }) async {
+    return performLoginWithDetails(
+      credential.username,
+      credential.password,
+      loginUrl,
+      method: method,
+      headers: headers,
+    );
+  }
+
+  Future<LoginResponse> performLoginWithDetails(
+    String username,
+    String password,
+    String loginUrl, {
+    String method = 'POST',
+    Map<String, String>? headers,
+  }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final url = Uri.parse('http://172.16.1.1:8090/login.xml');
+    final url = Uri.parse(loginUrl);
+    final queryParams = {
+      'mode': '191',
+      'username': username,
+      'password': password,
+      'a': timestamp,
+      'producttype': '0',
+    };
 
     try {
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: {
-              'mode': '191',
-              'username': credential.username,
-              'password': credential.password,
-              'a': timestamp,
-              'producttype': '0',
-            },
-          )
-          .timeout(const Duration(seconds: 10));
+      final actualHeaders =
+          headers ?? {'Content-Type': 'application/x-www-form-urlencoded'};
+      http.Response response;
+
+      if (method.toUpperCase() == 'GET') {
+        final getUrl = url.replace(queryParameters: queryParams);
+        response = await http
+            .get(getUrl, headers: actualHeaders)
+            .timeout(const Duration(seconds: 10));
+      } else {
+        response = await http
+            .post(url, headers: actualHeaders, body: queryParams)
+            .timeout(const Duration(seconds: 10));
+      }
 
       if (response.statusCode == 200) {
-        return _parseLoginResponse(response.body, credential.username);
+        return _parseLoginResponse(response.body, username);
       } else {
         return LoginResponse(
           status: 'ERROR',

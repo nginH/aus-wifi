@@ -14,6 +14,9 @@ class WifiState {
   final List<LoginLog> logs;
   final int currentCredentialIndex;
   final String targetSubnet;
+  final String loginUrl;
+  final String httpMethod;
+  final Map<String, String> headers;
   final int checkInterval;
   final int loginInterval;
 
@@ -26,6 +29,9 @@ class WifiState {
     this.logs = const [],
     this.currentCredentialIndex = 0,
     this.targetSubnet = '172.16.56',
+    this.loginUrl = 'http://172.16.1.1:8090/login.xml',
+    this.httpMethod = 'POST',
+    this.headers = const {'Content-Type': 'application/x-www-form-urlencoded'},
     this.checkInterval = 1,
     this.loginInterval = 30,
   });
@@ -39,6 +45,9 @@ class WifiState {
     List<LoginLog>? logs,
     int? currentCredentialIndex,
     String? targetSubnet,
+    String? loginUrl,
+    String? httpMethod,
+    Map<String, String>? headers,
     int? checkInterval,
     int? loginInterval,
   }) {
@@ -52,6 +61,9 @@ class WifiState {
       currentCredentialIndex:
           currentCredentialIndex ?? this.currentCredentialIndex,
       targetSubnet: targetSubnet ?? this.targetSubnet,
+      loginUrl: loginUrl ?? this.loginUrl,
+      httpMethod: httpMethod ?? this.httpMethod,
+      headers: headers ?? this.headers,
       checkInterval: checkInterval ?? this.checkInterval,
       loginInterval: loginInterval ?? this.loginInterval,
     );
@@ -109,9 +121,9 @@ class WifiNotifier extends StateNotifier<WifiState> {
 
     if (!_networkService.isTargetSubnet(ip, state.targetSubnet)) {
       state = state.copyWith(
-        status: 'Wrong Wi-Fi. This app has standards.',
+        status: 'Wrong Connection',
         message:
-            'If ${state.targetSubnet} isn’t your network, this isn’t your app.',
+            'The device is not connected to the required subnet: ${state.targetSubnet}.',
       );
       return;
     }
@@ -138,7 +150,12 @@ class WifiNotifier extends StateNotifier<WifiState> {
       message: 'Attempting with ${currentCred.username}',
     );
 
-    final response = await _networkService.performLogin(currentCred);
+    final response = await _networkService.performLogin(
+      currentCred,
+      state.loginUrl,
+      method: state.httpMethod,
+      headers: state.headers,
+    );
     _lastLoginTime = DateTime.now();
 
     if (response.isSuccess) {
@@ -187,8 +204,62 @@ class WifiNotifier extends StateNotifier<WifiState> {
     await _loadInitialData();
   }
 
+  Future<void> updateCredential(
+    int id,
+    String username,
+    String password,
+  ) async {
+    final cred = state.credentials.firstWhere((c) => c.id == id);
+    await _db.updateCredential(
+      cred.copyWith(username: username, password: password),
+    );
+    await _loadInitialData();
+  }
+
+  Future<LoginResponse> performManualLogin(
+    String username,
+    String password,
+  ) async {
+    state = state.copyWith(
+      status: 'Logging in',
+      message: 'Manual attempt for $username',
+    );
+
+    final response = await _networkService.performLoginWithDetails(
+      username,
+      password,
+      state.loginUrl,
+      method: state.httpMethod,
+      headers: state.headers,
+    );
+
+    if (response.isSuccess) {
+      state = state.copyWith(status: 'Connected', message: response.message);
+    } else {
+      state = state.copyWith(status: 'Login Failed', message: response.message);
+    }
+
+    // Refresh logs
+    final logs = await _db.getLogs();
+    state = state.copyWith(logs: logs);
+
+    return response;
+  }
+
   void updateTargetSubnet(String subnet) {
     state = state.copyWith(targetSubnet: subnet);
+  }
+
+  void updateLoginUrl(String url) {
+    state = state.copyWith(loginUrl: url);
+  }
+
+  void updateHttpMethod(String method) {
+    state = state.copyWith(httpMethod: method);
+  }
+
+  void updateHeaders(Map<String, String> headers) {
+    state = state.copyWith(headers: headers);
   }
 
   Future<void> clearLogs() async {

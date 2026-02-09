@@ -61,7 +61,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: _subnetController,
                     decoration: const InputDecoration(
                       labelText:
-                          "Target Subnet is preconfigured. Change it only if you’re a CS student who passed networking and CIDR without crying.",
+                          "Target Subnet is preconfigured. Change it only if you’re a CS student who passed networking and CIDR Classes without crying.",
                       hintText: "e.g. 172.16.56",
                       border: InputBorder.none,
                     ),
