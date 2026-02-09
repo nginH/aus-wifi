@@ -41,7 +41,7 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "AUS WIFI",
+          "AUS WIFI Connector",
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -49,9 +49,16 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
         Text(
-          "Network Monitor",
+          "I don’t get attached to one login.",
           style: TextStyle(
             fontSize: 16,
+            color: NeumorphicTheme.variantColor(context),
+          ),
+        ),
+        Text(
+          "If it fails, I switch — fast, smooth, and without asking for permission 😏",
+          style: TextStyle(
+            fontSize: 14,
             color: NeumorphicTheme.variantColor(context),
           ),
         ),
@@ -64,7 +71,7 @@ class DashboardScreen extends ConsumerWidget {
     bool isError =
         state.status == 'Error' ||
         state.status == 'Login Failed' ||
-        state.status == 'Wrong Network';
+        state.status == 'Wrong Wi-Fi. This app has standards.';
 
     return Neumorphic(
       padding: const EdgeInsets.all(24),
@@ -147,6 +154,11 @@ class DashboardScreen extends ConsumerWidget {
     WifiState state,
     WifiNotifier notifier,
   ) {
+    bool isConnected = state.status == 'Connected';
+    bool isError =
+        state.status == 'Error' ||
+        state.status == 'Login Failed' ||
+        state.status == 'Wrong Wi-Fi. This app has standards.';
     return Center(
       child: NeumorphicButton(
         onPressed: notifier.toggleMonitoring,
@@ -156,9 +168,11 @@ class DashboardScreen extends ConsumerWidget {
               : NeumorphicShape.convex,
           boxShape: const NeumorphicBoxShape.circle(),
           depth: state.isMonitoring ? -10 : 10,
-          color: state.isMonitoring
-              ? NeumorphicTheme.accentColor(context)
-              : null,
+          color: !state.isMonitoring
+              ? Colors.white
+              : (isConnected
+                    ? NeumorphicTheme.accentColor(context)
+                    : (isError ? Colors.red : Colors.orange)),
         ),
         padding: const EdgeInsets.all(50),
         child: Icon(
@@ -166,7 +180,9 @@ class DashboardScreen extends ConsumerWidget {
           size: 60,
           color: state.isMonitoring
               ? Colors.white
-              : NeumorphicTheme.accentColor(context),
+              : (isConnected
+                    ? NeumorphicTheme.accentColor(context)
+                    : (isError ? Colors.red : Colors.orange)),
         ),
       ),
     );

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/wifi_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -25,6 +25,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   late TextEditingController _intervalController;
 
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        // Many platforms still allow launching even if canLaunchUrl returns false
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final notifier = ref.read(wifiProvider.notifier);
@@ -46,7 +60,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _subnetController,
                     decoration: const InputDecoration(
-                      labelText: "Target Subnet",
+                      labelText:
+                          "Target Subnet is preconfigured. Change it only if you’re a CS student who passed networking and CIDR without crying.",
                       hintText: "e.g. 172.16.56",
                       border: InputBorder.none,
                     ),
@@ -56,7 +71,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   TextField(
                     controller: _intervalController,
                     decoration: const InputDecoration(
-                      labelText: "Login Interval (seconds)",
+                      labelText:
+                          "Login Interval (Recommended: 30) Reduce if you still get disconnected (value is in seconds)",
                       hintText: "e.g. 30",
                       border: InputBorder.none,
                     ),
@@ -93,6 +109,67 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: NeumorphicTheme.variantColor(context),
                   fontSize: 12,
                 ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Build by Harsh Anand",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: NeumorphicTheme.variantColor(context),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                      color: Colors.white,
+                    ),
+                    child: IconButton(
+                      onPressed: () async {
+                        await _launchURL(
+                          "https://www.instagram.com/harsh_.anand/",
+                        );
+                      },
+                      icon: Image.asset(
+                        "assets/images/insta.png",
+                        width: 30,
+                        height: 30,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                      color: Colors.white,
+                    ),
+                    child: IconButton(
+                      onPressed: () async {
+                        await _launchURL("https://github.com/nginH/aus-wifi");
+                      },
+                      icon: Image.asset(
+                        "assets/images/git.png",
+                        width: 24,
+                        height: 24,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      await _launchURL(
+                        "https://github.com/nginH/aus-wifi/releases",
+                      );
+                    },
+                    icon: Icon(Icons.share),
+                  ),
+                ],
               ),
             ),
           ],

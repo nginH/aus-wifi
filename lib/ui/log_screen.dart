@@ -18,7 +18,6 @@ class LogScreen extends ConsumerWidget {
         title: const Text("Login History"),
         actions: [
           NeumorphicButton(
-            child: const Icon(Icons.delete_sweep_rounded),
             onPressed: () => notifier.clearLogs(),
             style: const NeumorphicStyle(boxShape: NeumorphicBoxShape.circle()),
           ),

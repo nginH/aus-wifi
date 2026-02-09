@@ -109,8 +109,9 @@ class WifiNotifier extends StateNotifier<WifiState> {
 
     if (!_networkService.isTargetSubnet(ip, state.targetSubnet)) {
       state = state.copyWith(
-        status: 'Wrong Network',
-        message: 'Not on target subnet: ${state.targetSubnet}',
+        status: 'Wrong Wi-Fi. This app has standards.',
+        message:
+            'If ${state.targetSubnet} isn’t your network, this isn’t your app.',
       );
       return;
     }
