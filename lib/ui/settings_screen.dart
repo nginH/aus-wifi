@@ -104,7 +104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 40),
             Center(
               child: Text(
-                "Version 1.0.0",
+                "Version 1.1.0",
                 style: TextStyle(
                   color: NeumorphicTheme.variantColor(context),
                   fontSize: 12,

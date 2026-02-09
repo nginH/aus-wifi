@@ -131,7 +131,7 @@ class MyApp extends StatelessWidget {
 
                     const Spacer(),
                     Text(
-                      "Version 1.0.0",
+                      "Version 1.1.0",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: NeumorphicTheme.variantColor(context),
